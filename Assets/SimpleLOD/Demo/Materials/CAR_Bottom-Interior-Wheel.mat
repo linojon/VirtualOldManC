@@ -31,16 +31,16 @@ Material:
           m_Offset: {x: 0, y: 0}
       data:
         first:
-          name: _Cube
+          name: _LightMap
         second:
-          m_Texture: {fileID: 0}
+          m_Texture: {fileID: 2800000, guid: 168020b7e713163458a123ebe0fcdf37, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
         first:
-          name: _LightMap
+          name: _Cube
         second:
-          m_Texture: {fileID: 2800000, guid: 168020b7e713163458a123ebe0fcdf37, type: 3}
+          m_Texture: {fileID: 0}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
@@ -64,16 +64,16 @@ Material:
         second: .355384916
       data:
         first:
+          name: _LightmapDensity
+        second: 1
+      data:
+        first:
           name: _DecalColoring
         second: .5
       data:
         first:
           name: _Sparkle
         second: .00999999978
-      data:
-        first:
-          name: _LightmapDensity
-        second: 1
     m_Colors:
       data:
         first:

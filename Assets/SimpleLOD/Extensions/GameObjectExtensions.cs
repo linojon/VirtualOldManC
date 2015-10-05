@@ -1,7 +1,7 @@
-/* SimpleLOD 1.5     */
+/* SimpleLOD 1.5d    */
 /* By Orbcreation BV */
 /* Richard Knol      */
-/* March 4, 2015      */
+/* Aug 11, 2015      */
 
 /* Note: if you also use other packages by Orbcreation,  */
 /* you may end up with multiple copies of this file.     */
@@ -309,7 +309,7 @@ namespace OrbCreationExtensions
 		public static Mesh[] CombineMeshes(this GameObject aGO) {
 			return CombineMeshes(aGO, new string[0] {});
 		}
-		public static Mesh[] CombineMeshes(this GameObject aGO, string[] skipSubmeshNames) {
+		public static Mesh[] CombineMeshes(this GameObject aGO, string[] skipSubmeshNames, bool makeNewGameObjectWhenRendererPresent = true) {
 			List<Mesh> meshes = new List<Mesh>();
 			MeshRenderer[] meshRenderers = aGO.GetComponentsInChildren<MeshRenderer>(false);
 			SkinnedMeshRenderer[] skinnedMeshRenderers = aGO.GetComponentsInChildren<SkinnedMeshRenderer>(false);
@@ -318,7 +318,7 @@ namespace OrbCreationExtensions
 			int totalMeshCountAnyLightmapIdx = 0;
 			int lightmapIndex = -999;
 			bool makeNewGameObject = false;
-			if(aGO.GetComponent<SkinnedMeshRenderer>() != null || aGO.GetComponent<MeshRenderer>() != null) makeNewGameObject = true;
+			if(aGO.GetComponent<SkinnedMeshRenderer>() != null || aGO.GetComponent<MeshRenderer>() != null) makeNewGameObject = makeNewGameObjectWhenRendererPresent;
 
 			if(skinnedMeshRenderers != null && skinnedMeshRenderers.Length > 0) {
 				foreach(SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRenderers) {
@@ -418,6 +418,9 @@ namespace OrbCreationExtensions
 					bool hasSkinnedMesh = false;
 					int counter = 0;
 					int nrOfMeshWithBlendShapes = -1;
+				#if UNITY_5
+					// Unity 5 crashes when you set mesh.vertices = null; while there are blendshapes
+				#else
 					// First we process the first mesh that has blendshapes
 					int meshNr = 0;
 					foreach(SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRenderers) {
@@ -435,7 +438,7 @@ namespace OrbCreationExtensions
 										mesh.uv4 = null;
 										mesh.uv3 = null;
 									#endif
-									mesh.uv2 = null;
+									mesh.uv = null;
 									mesh.uv2 = null;
 									mesh.boneWeights = null;
 									mesh.colors32 = null;
@@ -454,6 +457,7 @@ namespace OrbCreationExtensions
 							meshNr++;
 						}
 					}
+				#endif
 
 					// then we process all the other skinned meshes except the blendshaped one
 					foreach(SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRenderers) {
@@ -480,7 +484,11 @@ namespace OrbCreationExtensions
 							if(filter != null && filter.sharedMesh != null && filter.gameObject != topGO) {
 								if(vertices.Count + filter.sharedMesh.vertexCount > 65534) meshLimitReached = true;
 								if(meshOffset <= counter && (!meshLimitReached)) {
+									#if UNITY_5
 									bool allSubmeshesMerged = MergeMeshInto(filter.sharedMesh, null, meshRenderer.sharedMaterials, vertices, normals, uv1s, uv2s, uv3s, uv4s, colors32, boneWeights, bones, bindPoses, subMeshes, ((filter.transform.localScale.x * filter.transform.localScale.y * filter.transform.localScale.z) < 0f), meshRenderer.lightmapScaleOffset, filter.transform, topGO.transform, filter.gameObject.name + "_" + filter.sharedMesh.name, skipSubmeshNames);
+									#else
+									bool allSubmeshesMerged = MergeMeshInto(filter.sharedMesh, null, meshRenderer.sharedMaterials, vertices, normals, uv1s, uv2s, uv3s, uv4s, colors32, boneWeights, bones, bindPoses, subMeshes, ((filter.transform.localScale.x * filter.transform.localScale.y * filter.transform.localScale.z) < 0f), meshRenderer.lightmapTilingOffset, filter.transform, topGO.transform, filter.gameObject.name + "_" + filter.sharedMesh.name, skipSubmeshNames);
+									#endif
 									if(allSubmeshesMerged) {
 										// the gameObject has now become a bone, so I wll not disable it, but disable the renderer instead;
 										meshRenderer.enabled = false;
@@ -498,7 +506,11 @@ namespace OrbCreationExtensions
 							MeshFilter filter = meshRenderer.gameObject.GetComponent<MeshFilter>();
 							if(filter != null && filter.sharedMesh != null) {
 								if(meshOffset <= counter && vertices.Count + filter.sharedMesh.vertexCount <= 65534) {
-									bool allSubmeshesMerged = MergeMeshInto(filter.sharedMesh, null, meshRenderer.sharedMaterials, vertices, normals, uv1s, uv2s, uv3s, uv4s, colors32, boneWeights, bones, bindPoses, subMeshes, ((filter.transform.localScale.x * filter.transform.localScale.y * filter.transform.localScale.z) < 0f), meshRenderer.lightmapScaleOffset, filter.transform, topGO.transform, filter.gameObject.name + "_" + filter.sharedMesh.name, skipSubmeshNames);
+									#if UNITY_5
+										bool allSubmeshesMerged = MergeMeshInto(filter.sharedMesh, null, meshRenderer.sharedMaterials, vertices, normals, uv1s, uv2s, uv3s, uv4s, colors32, boneWeights, bones, bindPoses, subMeshes, ((filter.transform.localScale.x * filter.transform.localScale.y * filter.transform.localScale.z) < 0f), meshRenderer.lightmapScaleOffset, filter.transform, topGO.transform, filter.gameObject.name + "_" + filter.sharedMesh.name, skipSubmeshNames);
+									#else
+										bool allSubmeshesMerged = MergeMeshInto(filter.sharedMesh, null, meshRenderer.sharedMaterials, vertices, normals, uv1s, uv2s, uv3s, uv4s, colors32, boneWeights, bones, bindPoses, subMeshes, ((filter.transform.localScale.x * filter.transform.localScale.y * filter.transform.localScale.z) < 0f), meshRenderer.lightmapTilingOffset, filter.transform, topGO.transform, filter.gameObject.name + "_" + filter.sharedMesh.name, skipSubmeshNames);
+									#endif
 									if(allSubmeshesMerged && filter.gameObject != topGO) {
 										filter.gameObject.SetActive(false);
 
@@ -690,6 +702,7 @@ namespace OrbCreationExtensions
  #elif UNITY_WINRT_8_0
  #elif UNITY_WINRT_8_1
  #elif NETFX_CORE
+ #elif UNITY_WEBGL
  #else
 		public static IEnumerator SetUpLODLevelsWithLODSwitcherInBackground(this GameObject go, float[] lodScreenSizes, float[] maxWeights, bool recalcNormals, float removeSmallParts = 1f, float protectNormals = 1f, float protectUvs = 1f, float protectSubMeshesAndSharpEdges = 1f, float smallTrianglesFirst = 1f) {
 			yield return null;
@@ -863,12 +876,19 @@ namespace OrbCreationExtensions
 					children[i].transform.localRotation = Quaternion.identity;
 					children[i].transform.localScale = Vector3.one;
 				}
-				MeshFilter filter = children[i].GetComponent<MeshFilter>();
-				if(filter == null) filter = children[i].AddComponent<MeshFilter>();
-				filter.sharedMesh = lodMeshes[i];
-				MeshRenderer rend = children[i].GetComponent<MeshRenderer>();
-				if(rend == null) rend = children[i].AddComponent<MeshRenderer>();
-				rend.sharedMaterials = mats;
+				if(smr != null) {
+					SkinnedMeshRenderer sRend = children[i].GetComponent<SkinnedMeshRenderer>();
+					if(sRend == null) sRend = children[i].AddComponent<SkinnedMeshRenderer>();
+					sRend.sharedMesh = lodMeshes[i];
+					sRend.sharedMaterials = mats;
+				} else {
+					MeshFilter filter = children[i].GetComponent<MeshFilter>();
+					if(filter == null) filter = children[i].AddComponent<MeshFilter>();
+					filter.sharedMesh = lodMeshes[i];
+					MeshRenderer rend = children[i].GetComponent<MeshRenderer>();
+					if(rend == null) rend = children[i].AddComponent<MeshRenderer>();
+					rend.sharedMaterials = mats;
+				}
 				children[i].SetActive(i==0);
 			}
 			lodSwitcher.lodGameObjects = children;
@@ -964,7 +984,19 @@ namespace OrbCreationExtensions
 				meshesOrig = meshesLOD;
 			}
 
-			lodGroup.SetLODS(lods);
+			#if UNITY_4_3
+				lodGroup.SetLODS(lods);
+			#elif UNITY_4_4
+				lodGroup.SetLODS(lods);
+			#elif UNITY_4_5
+				lodGroup.SetLODS(lods);
+			#elif UNITY_4_6
+				lodGroup.SetLODS(lods);
+			#elif UNITY_5_0
+				lodGroup.SetLODS(lods);
+			#else
+				lodGroup.SetLODs(lods);
+			#endif
 			lodGroup.RecalculateBounds();
 			lodGroup.ForceLOD(-1); 
 			return lodMeshes.ToArray();
@@ -1012,7 +1044,8 @@ namespace OrbCreationExtensions
  #elif UNITY_WINRT_8_0
  #elif UNITY_WINRT_8_1
  #elif NETFX_CORE
- #else
+ #elif UNITY_WEBGL
+#else
 		public static IEnumerator GetSimplifiedMeshInBackground(this GameObject go, float maxWeight, bool recalcNormals, float removeSmallParts, System.Action<Mesh> result) {
 			Mesh mesh = null;
 			LODSwitcher lodSwitcher = go.GetComponent<LODSwitcher>();
@@ -1141,16 +1174,6 @@ namespace OrbCreationExtensions
 			Vector3 oldScale = fromTransform.localScale;
 	    	bool remapVertices = false;
 
-/* 
-test with vertex colors
-fromColors32 = new Color32[fromVertices.Length];
-for(int i=0;i<fromVertices.Length;i++) {
-	fromColors32[i] = new Color((fromVertices[i].x - fromMesh.bounds.min.x) / fromMesh.bounds.max.x,
-		(fromVertices[i].y - fromMesh.bounds.min.y) / fromMesh.bounds.max.y,
-		(fromVertices[i].z - fromMesh.bounds.min.z) / fromMesh.bounds.max.z
-		);
-}
-*/
 	    	if(fromBones != null) {
 				fromTransform.localPosition = Vector3.zero;
 				fromTransform.localRotation = Quaternion.identity;

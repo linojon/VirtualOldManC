@@ -1,7 +1,7 @@
-﻿/* SimpleLOD 1.5     */
+﻿/* SimpleLOD 1.5d    */
 /* By Orbcreation BV */
 /* Richard Knol      */
-/* March 4, 2015      */
+/* August 5, 2015    */
 
 using UnityEditor;
 using UnityEngine;
@@ -87,7 +87,19 @@ public class SimpleLOD_EditorPopup : EditorWindow {
 		this.position = new Rect(Screen.width/2,Screen.height/2, 390, 470);
 		this.minSize = new Vector3(390,250);
 		this.maxSize = new Vector3(390,650);
-		this.title = "SimpleLOD 1.5";
+		#if UNITY_4_3
+			this.title = "SimpleLOD 1.5";
+		#elif UNITY_4_4
+			this.title = "SimpleLOD 1.5";
+		#elif UNITY_4_5
+			this.title = "SimpleLOD 1.5";
+		#elif UNITY_4_6
+			this.title = "SimpleLOD 1.5";
+		#elif UNITY_5_0
+			this.title = "SimpleLOD 1.5";
+		#else
+			this.titleContent = new GUIContent("SimpleLOD 1.5");
+		#endif
 		this.Show();
 		go = Selection.activeGameObject;
 		MakeBackup(go, true);
@@ -612,8 +624,8 @@ public class SimpleLOD_EditorPopup : EditorWindow {
 				string sizeStr = "";
 				sizeStr = "LOD 0: " + meshes[0].vertexCount + " vertices, " + (meshes[0].triangles.Length / 3) + " triangles";
 				path = path + "/";
-				for(int i=1;i<meshes.Length;i++) {
-					sizeStr = sizeStr + "\nLOD " + i +": " + meshes[i].vertexCount + " vertices, " + (meshes[i].triangles.Length / 3) + " triangles";
+				for(int i=0;i<meshes.Length;i++) {
+					if(i>0) sizeStr = sizeStr + "\nLOD " + i +": " + meshes[i].vertexCount + " vertices, " + (meshes[i].triangles.Length / 3) + " triangles";
 					if(meshes[i] != null && meshes[i].vertexCount > 0) {
 						string meshPath = AssetDatabase.GenerateUniqueAssetPath(path + meshes[i].name + ".asset");
 						AssetDatabase.CreateAsset(meshes[i], meshPath);
@@ -703,6 +715,10 @@ public class SimpleLOD_EditorPopup : EditorWindow {
 			if(pos <= 0) return null;
 			string name = aGO.name.Substring(0,pos);
 			aGO = aGO.FindFirstChildWithName(name);
+			if(aGO == null) {
+				Debug.LogError("Child gameObject with name "+name+" not found");
+				return null;
+			}
 		}
 
 		SkinnedMeshRenderer[] smr = aGO.GetComponentsInChildren<SkinnedMeshRenderer>(true);

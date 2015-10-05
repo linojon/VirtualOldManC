@@ -1,7 +1,7 @@
-/* SimpleLOD 1.5     */
+/* SimpleLOD 1.5d    */
 /* By Orbcreation BV */
 /* Richard Knol      */
-/* March 4, 2015      */
+/* Aug 11, 2015      */
 
 using UnityEditor;
 using UnityEngine;
@@ -91,7 +91,19 @@ public class SimpleLOD_MaterialPopup : EditorWindow {
 			this.position = new Rect((Screen.width/2)+200, (Screen.height/2)+50, 850, 500);
 			this.minSize = new Vector3(500,200);
 			this.maxSize = new Vector3(850,1000);
-			this.title = "Materials";
+			#if UNITY_4_3
+				this.title = "Materials";
+			#elif UNITY_4_4
+				this.title = "Materials";
+			#elif UNITY_4_5
+				this.title = "Materials";
+			#elif UNITY_4_6
+				this.title = "Materials";
+			#elif UNITY_5_0
+				this.title = "Materials";
+			#else
+				this.titleContent = new GUIContent("Materials");
+			#endif
 			this.Show();
 		} else {
 			Close();
@@ -159,6 +171,13 @@ public class SimpleLOD_MaterialPopup : EditorWindow {
 					row["atlasRect"] = new Rect(0,0,1,1);
 					row["isAtlas"] = false;
 					row["order"] = order;
+					row["p0"] = (Texture2D)Texture2D.Instantiate(pixel);
+					row["p1"] = (Texture2D)Texture2D.Instantiate(pixel);
+					row["p2"] = (Texture2D)Texture2D.Instantiate(pixel);
+					row["p3"] = (Texture2D)Texture2D.Instantiate(pixel);
+					row["p4"] = (Texture2D)Texture2D.Instantiate(pixel);
+					row["p5"] = (Texture2D)Texture2D.Instantiate(pixel);
+					row["p6"] = (Texture2D)Texture2D.Instantiate(pixel);
 					order += 2;
 					if(mat.HasProperty("_BumpMap")) {
 						Texture t = mat.GetTexture("_BumpMap");
@@ -194,6 +213,17 @@ public class SimpleLOD_MaterialPopup : EditorWindow {
 
 	public new void Close() {
 		go = null;
+		for(int i=0;i<submeshRows.Count;i++) {
+			Hashtable row = (Hashtable)submeshRows[i];
+			DestroyImmediate((Texture2D)row["p0"]);
+			DestroyImmediate((Texture2D)row["p1"]);
+			DestroyImmediate((Texture2D)row["p2"]);
+			DestroyImmediate((Texture2D)row["p3"]);
+			DestroyImmediate((Texture2D)row["p4"]);
+			DestroyImmediate((Texture2D)row["p5"]);
+			DestroyImmediate((Texture2D)row["p6"]);
+		}
+		submeshRows.Clear();
 		submeshRows = null;
 		dragRow = null;
 		DestroyImmediate(pixel);
@@ -346,9 +376,10 @@ public class SimpleLOD_MaterialPopup : EditorWindow {
 					}
 
 					if(dragAtlas == row || dragRow == row) {
-						pixel.SetPixels(new Color[] {new Color(emptyGrey, emptyGrey, emptyGrey)});
-						pixel.Apply(false, false);
-						GUI.DrawTexture(new Rect(lx, ly + gap, lw, lh), pixel, ScaleMode.StretchToFill, false, 0f);
+						Texture2D p5 = (Texture2D)row["p5"];
+						p5.SetPixels(new Color[] {new Color(emptyGrey, emptyGrey, emptyGrey)});
+						p5.Apply(false, false);
+						GUI.DrawTexture(new Rect(lx, ly + gap, lw, lh), p5, ScaleMode.StretchToFill, false, 0f);
 						dx = lx + Mathf.Clamp(dragToPosition.x - dragFromPosition.x, -100, 100);
 						dy = Mathf.Clamp(ly + dragToPosition.y - dragFromPosition.y, 0, Mathf.Infinity);
 					}
@@ -360,10 +391,12 @@ public class SimpleLOD_MaterialPopup : EditorWindow {
 						DrawRow(row, lx, ly, lw, lh, m, leftHandSide, 0.3f, titleStyle);
 						DrawRowAtlas(row, lx, ly, lw, lh, m, leftHandSide, 0.3f, titleStyle, false);
 						gap = lh * 0.6f;
-						pixel.SetPixels(new Color[] {new Color(emptyGrey, emptyGrey, emptyGrey)});
-						pixel.Apply(false, false);
-						GUI.DrawTexture(new Rect(lx, ly + lh, lw, gap), pixel, ScaleMode.StretchToFill, false, 0f);
+						Texture2D p6 = (Texture2D)row["p6"];
+						p6.SetPixels(new Color[] {new Color(emptyGrey, emptyGrey, emptyGrey)});
+						p6.Apply(false, false);
+						GUI.DrawTexture(new Rect(lx, ly + lh, lw, gap), p6, ScaleMode.StretchToFill, false, 0f);
 					} else if(dragRow != row){
+
 						DrawRow(row, lx, ly + gap, lw, lh, m, leftHandSide, 0.25f, titleStyle);
 					}
 					if(dragIntoAtlas == row) {
@@ -446,6 +479,7 @@ public class SimpleLOD_MaterialPopup : EditorWindow {
 				hasChanges = HasAnyChanges();
 			}
 		}
+
 		if(dragAtlas != null) {
 			bool draggedEnough = Vector2.Distance(dragFromPosition, dragToPosition) > 5f;
 			GUI.color = new Color(1,1,1,0.7f);
@@ -532,6 +566,7 @@ public class SimpleLOD_MaterialPopup : EditorWindow {
 				hasChanges = HasAnyChanges();
 			}
 		}
+
 		EditorGUILayout.EndScrollView();
 	}
 
@@ -545,10 +580,11 @@ public class SimpleLOD_MaterialPopup : EditorWindow {
 
 		float alpha = GUI.color.a;
 		GUI.color = new Color(1,1,1,alpha * alpha * alpha);
-		pixel.SetPixels(new Color[] {new Color(bgGrey, bgGrey, bgGrey)});
-		pixel.Apply(false, false);
-		GUI.DrawTexture(new Rect(rx, ry, leftHandSide - rx, rh), pixel, ScaleMode.StretchToFill, false, 0f);
-		GUI.DrawTexture(new Rect(leftHandSide + m, ry, rw + rx - leftHandSide - m, rh), pixel, ScaleMode.StretchToFill, false, 0f);
+		Texture2D p0 = (Texture2D)row["p0"];
+		p0.SetPixels(new Color[] {new Color(bgGrey, bgGrey, bgGrey)});
+		p0.Apply(false, false);
+		GUI.DrawTexture(new Rect(rx, ry, leftHandSide - rx, rh), p0, ScaleMode.StretchToFill, false, 0f);
+		GUI.DrawTexture(new Rect(leftHandSide + m, ry, rw + rx - leftHandSide - m, rh), p0, ScaleMode.StretchToFill, false, 0f);
 		GUI.color = new Color(1,1,1,alpha);
 
 		y = ry;
@@ -582,9 +618,9 @@ public class SimpleLOD_MaterialPopup : EditorWindow {
 			GUI.Label(new Rect(x,y,10 * (w + m),h), "Using parent properties", titleStyle);
 			x += 10 * (w + m);
 		} else {
-			DrawColorProperty(mat, new string[] {"_Color"}, ref x, y, w, h, m);
-			DrawColorProperty(mat, new string[] {"_SpecColor"}, ref x, y, w, h, m);
-			DrawColorProperty(mat, new string[] {"_EmissionColor"}, ref x, y, w, h, m);
+			DrawColorProperty((Texture2D)row["p1"], mat, new string[] {"_Color"}, ref x, y, w, h, m);
+			DrawColorProperty((Texture2D)row["p2"], mat, new string[] {"_SpecColor"}, ref x, y, w, h, m);
+			DrawColorProperty((Texture2D)row["p3"], mat, new string[] {"_EmissionColor"}, ref x, y, w, h, m);
 
 			DrawFloatProperty(mat, new string[] {"_Cutoff", "_CutOff"}, ref x, y, w, h, m);
 			DrawFloatProperty(mat, new string[] {"_Shininess", "_Glossiness"}, ref x, y, w, h, m);
@@ -604,9 +640,10 @@ public class SimpleLOD_MaterialPopup : EditorWindow {
 
 		float alpha = GUI.color.a;
 		GUI.color = new Color(1,1,1,alpha * alpha * alpha);
-		pixel.SetPixels(new Color[] {new Color(bgGrey, bgGrey, bgGrey)});
-		pixel.Apply(false, false);
-		GUI.DrawTexture(new Rect(leftHandSide + m, ry, rw + rx - leftHandSide - m, rh), pixel, ScaleMode.StretchToFill, false, 0f);
+		Texture2D p4 = (Texture2D)row["p4"];
+		p4.SetPixels(new Color[] {new Color(bgGrey, bgGrey, bgGrey)});
+		p4.Apply(false, false);
+		GUI.DrawTexture(new Rect(leftHandSide + m, ry, rw + rx - leftHandSide - m, rh), p4, ScaleMode.StretchToFill, false, 0f);
 		GUI.color = new Color(1,1,1,alpha);
 
 		y = ry + 3;
@@ -691,7 +728,7 @@ public class SimpleLOD_MaterialPopup : EditorWindow {
 		x += w + m;
 	}
 
-	private void DrawColorProperty(Material mat, string[] names, ref float x, float y, float w, float h, float m) {
+	private void DrawColorProperty(Texture2D pixel, Material mat, string[] names, ref float x, float y, float w, float h, float m) {
 		foreach(string name in names) {
 			if(mat.HasProperty(name)) {
 				Color[] pix = new Color[] {mat.GetColor(name)};
@@ -869,7 +906,7 @@ public class SimpleLOD_MaterialPopup : EditorWindow {
 			foreach(string key in textureKeys) {
 				if(mat.HasProperty(key)) {
 					Texture tex = mat.GetTexture(key);
-					if(tex.GetType() == typeof(Texture2D)) {
+					if(tex != null && tex.GetType() == typeof(Texture2D)) {
 						Texture2D readableTex = MakeReadable((Texture2D)tex);
 						ReplaceTextureInAllMaterialsInAllRows(tex, readableTex);
 					}

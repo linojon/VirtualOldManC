@@ -1,7 +1,7 @@
-/* SimpleLOD 1.5     */
+/* SimpleLOD 1.5d    */
 /* By Orbcreation BV */
 /* Richard Knol      */
-/* March 4, 2015      */
+/* Aug 11, 2015      */
 
 using UnityEditor;
 using UnityEngine;
@@ -24,7 +24,19 @@ public class SimpleLOD_RemovePopup : EditorWindow {
 		this.position = new Rect((Screen.width/2)+200, (Screen.height/2)+50, 370, 500);
 		this.minSize = new Vector3(370,200);
 		this.maxSize = new Vector3(370,1000);
-		this.title = "Del submesh";
+		#if UNITY_4_3
+			this.title = "Del submesh";
+		#elif UNITY_4_4
+			this.title = "Del submesh";
+		#elif UNITY_4_5
+			this.title = "Del submesh";
+		#elif UNITY_4_6
+			this.title = "Del submesh";
+		#elif UNITY_5_0
+			this.title = "Del submesh";
+		#else
+			this.titleContent = new GUIContent("Del submesh");
+		#endif
 		this.Show();
 	}
 

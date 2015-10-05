@@ -1,7 +1,7 @@
-﻿/* SimpleLOD 1.5     */
+﻿/* SimpleLOD 1.5d    */
 /* By Orbcreation BV */
 /* Richard Knol      */
-/* March 4, 2015      */
+/* Aug 11, 2015      */
 
 using UnityEngine;
 using System;
@@ -59,6 +59,10 @@ public class LODSwitcher : MonoBehaviour {
 		}
 		Camera cam = customCamera;
 		if(cam == null) cam = Camera.main;
+		if(cam == null) {
+			Debug.LogWarning("No scene camera found yet, you need to call LODSwitcher.ComputeDimensions() again when you have your Camera set up");
+			return;
+		}
 		Vector3 p0 = cam.ScreenToWorldPoint(new Vector3((Screen.width - 100f) / 2f, 0, 1f));
 		Vector3 p1 = cam.ScreenToWorldPoint(new Vector3((Screen.width + 100f) / 2f, 0, 1f));
 		pixelsPerMeter = 1f / (Vector3.Distance(p0, p1) / 100f);

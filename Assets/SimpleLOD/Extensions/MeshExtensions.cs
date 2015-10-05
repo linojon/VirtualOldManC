@@ -1,7 +1,7 @@
-﻿/* SimpleLOD 1.5     */
+﻿/* SimpleLOD 1.5d    */
 /* By Orbcreation BV */
 /* Richard Knol      */
-/* March 4, 2015      */
+/* Aug 11, 2015      */
 
 /* Note: if you also use other packages by Orbcreation,  */
 /* you may end up with multiple copies of this file.     */
@@ -305,7 +305,7 @@ namespace OrbCreationExtensions
 			for(int i=from+1;i<mesh.subMeshCount;i++) {
 				mesh.SetTriangles(mesh.GetTriangles(i), i-1);
 			}
-			mesh.SetTriangles(null, mesh.subMeshCount-1);
+			mesh.SetTriangles((int[])null, mesh.subMeshCount-1);
 			mesh.subMeshCount = mesh.subMeshCount-1;
 		}
 
@@ -586,7 +586,7 @@ namespace OrbCreationExtensions
 			return dist;
 		}
 
-		private static Vector3 GetNormal(Vector3 v0, Vector3 v1, Vector3 v2) {
+		public static Vector3 GetNormal(Vector3 v0, Vector3 v1, Vector3 v2) {
 	        return Vector3.Cross(v1 - v0, v2 - v0).normalized;
 	    }
 

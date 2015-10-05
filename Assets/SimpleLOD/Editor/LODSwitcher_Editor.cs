@@ -1,7 +1,7 @@
-﻿/* SimpleLOD 1.5     */
+﻿/* SimpleLOD 1.5d    */
 /* By Orbcreation BV */
 /* Richard Knol      */
-/* March 4, 2015      */
+/* Aug 11, 2015      */
 
 using UnityEngine;
 using UnityEditor;

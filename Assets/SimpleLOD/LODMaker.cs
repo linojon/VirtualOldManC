@@ -1,7 +1,7 @@
-﻿/* SimpleLOD 1.5     */
+﻿/* SimpleLOD 1.5d    */
 /* By Orbcreation BV */
 /* Richard Knol      */
-/* March 4, 2015      */
+/* Aug 11, 2015      */
 
 using UnityEngine;
 using System;
@@ -1224,7 +1224,7 @@ public static class LODMaker {
 					Array.Copy(ts, subMeshOffsets[s], subTs, 0, end - subMeshOffsets[s]);
 					mesh.SetTriangles(subTs, s);
 				} else {
-					mesh.SetTriangles(null, s);
+					mesh.SetTriangles((int[])null, s);
 				}
 			}
 		}

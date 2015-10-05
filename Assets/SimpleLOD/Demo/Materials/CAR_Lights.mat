@@ -50,12 +50,12 @@ Material:
         second: .078125
       data:
         first:
-          name: _InvFade
-        second: 1
-      data:
-        first:
           name: _Intensity
         second: 0
+      data:
+        first:
+          name: _InvFade
+        second: 1
       data:
         first:
           name: _EmissionLM
